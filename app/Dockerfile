@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 MAINTAINER Erik Wickstrom <erik@erikwickstrom.com>
 
 # install build dependencies
-RUN apt-get -qq update && apt-get -qqy install libreadline-dev libncurses5-dev libpcre3-dev libssl-dev perl make curl git-core luarocks
+RUN apt-get -qq update && apt-get -qqy install iputils-ping libreadline-dev libncurses5-dev libpcre3-dev libssl-dev perl make curl git-core luarocks
 
 # build/install OpenResty
 ENV SRC_DIR /opt
@@ -21,6 +21,7 @@ RUN cd $SRC_DIR && curl -LOs https://openresty.org/download/openresty-$OPENRESTY
 RUN luarocks install --server=http://rocks.moonscript.org/manifests/leafo lapis $LAPIS_VERSION
 RUN luarocks install moonscript
 RUN luarocks install lapis-console
+RUN luarocks install luacrypto
 
 WORKDIR $OPENRESTY_PREFIX/nginx/conf
 
@@ -30,8 +31,9 @@ EXPOSE 8080
 EXPOSE 80
 
 # Setup sample lapis project.
-COPY app/ .
+COPY webapp/ .
 
+RUN make all
 
 # LAPIS_OPENRESTY=/opt/openresty/nginx/sbin/nginx lapis server production
 ENTRYPOINT ["lapis"]

@@ -1,0 +1,13 @@
+version: '3'
+services:
+  web:
+    container_name: webapp
+    build: app
+    ports:
+     - "80:80"
+     - "8080:8080"
+    depends_on:
+      - postgresql
+  postgresql:
+    container_name: postgresql
+    build: database

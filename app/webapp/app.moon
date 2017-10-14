@@ -23,6 +23,7 @@ class extends lapis.Application
     "/": =>
         "Hello from Lapis #{require "lapis.version"}!"
 
+
     "/api/users":    respond_to {
         GET: =>
             users = Users\select!
@@ -40,20 +41,24 @@ class extends lapis.Application
         GET: =>
             user = Users\find @params.id
             json: user
+        DELETE: =>
+            user = Users\find @params.id
+            user\delete!
+            json: user
     }
 
-    "/api/tags":    respond_to {
+    "/api/tags": respond_to {
         POST: =>
             tag = Tags\create {
-                    name: @params.name
+                name: @params.name
             }
             json: tag
     }
 
-    "/api/tags":    respond_to {
-            GET: =>
-                tags = Tags\select!
-                json: tags
+    "/api/tags": respond_to {
+        GET: =>
+            tags = Tags\select!
+            json: tags
     }
 
     "/api/tags/:id": respond_to {
@@ -66,16 +71,21 @@ class extends lapis.Application
             json: tag
     }
 
-    "/api/posts":    respond_to {
+    "/api/posts": respond_to {
         GET: =>
-            posts = Tags\select!
+            posts = Posts\select!
             json: posts
-        POST: =>
-            "PUT posts"
     }
 
-    "/api/posts/:id": =>
-        "Get tags"
+    "/api/posts/:id": respond_to {
+        GET: =>
+            post = Posts\find @params.id
+            json: post
+        DELETE: =>
+            post = Posts\find @params.id
+            post\delete!
+            json: post
+    }
 
     "/console": respond_to {
         GET: =>

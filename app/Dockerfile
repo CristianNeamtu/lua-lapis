@@ -22,6 +22,7 @@ RUN luarocks install --server=http://rocks.moonscript.org/manifests/leafo lapis 
 RUN luarocks install moonscript
 RUN luarocks install lapis-console
 RUN luarocks install luacrypto
+RUN luarocks install inspect
 
 WORKDIR $OPENRESTY_PREFIX/nginx/conf
 
@@ -37,4 +38,4 @@ RUN make all
 
 # LAPIS_OPENRESTY=/opt/openresty/nginx/sbin/nginx lapis server production
 ENTRYPOINT ["lapis"]
-CMD ["server", "production"]
+CMD ["server", "development"]

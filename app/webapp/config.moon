@@ -5,6 +5,11 @@ dbConfig = require("en_vars")
 config "development", ->
     num_workers 1
     port 8080
+    measure_performance true
+    logging: {
+        queries: true
+        requests: true
+    }
     postgres ->
         host dbConfig.host
         user dbConfig.user

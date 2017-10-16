@@ -15,7 +15,7 @@ import create_table, types from require("lapis.db.schema")
            {"title", types.varchar}
            {"description", types.text}
            {"created_at", types.time}
-           {"updated_at", types.time}
+           {"updated_at", typeds.time}
            "PRIMARY KEY (id)"
         }
 

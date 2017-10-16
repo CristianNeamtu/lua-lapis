@@ -1,0 +1,20 @@
+
+
+<!DOCTYPE html>
+<html>
+   <body>
+      <form action="/api/users" method="post">
+         Name:<br>
+         <input type="text" name="name">
+         <br>
+         Email:<br>
+         <input type="text" name="email">
+         <br>
+         Display Name:<br>
+         <input type="text" name="display_name">
+         <br>
+         <input type="submit" value="Submit">
+      </form>
+   </body>
+</html>
+

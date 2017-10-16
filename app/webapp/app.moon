@@ -3,13 +3,31 @@ console = require "lapis.console"
 import respond_to from require "lapis.application"
 import Model from require "lapis.db.model"
 import split from require "moonscript.util"
-class Users extends Model
+import after_dispatch from require "lapis.nginx.context"
+import to_json from require "lapis.util"
+import capture_errors_json, yield_error, assert_error from require "lapis.application"
 
 class Posts extends Model
+    @timestamp: true
+    @relations: {
+        {"user", belongs_to: "Users"}
+    }
+
+class Users extends Model
+    @relations: {
+      {"posts", has_many: "Posts"}
+    }
 
 class Tags extends Model
 
-class extends lapis.Application
+class App extends lapis.Application
+    views_prefix: "views"
+    @enable "etlua"
+
+    @before_filter =>
+        after_dispatch ->
+          print to_json(ngx.ctx.performance)
+
     handle_error: (err, trace) =>
         trace = trace\gsub "\t", ""
         status: 500, json: {
@@ -21,10 +39,22 @@ class extends lapis.Application
         status: 404, json: "Nothing over here"
 
     "/": =>
-        "Hello from Lapis #{require "lapis.version"}!"
+        @html ->
+            h1 class: "header", "Hello"
+            div class: "body", ->
+              text "Welcome to Lapis #{require "lapis.version"}!"
 
+    "/new-user": =>
+        render: "form"
 
-    "/api/users":    respond_to {
+    "/posts": =>
+        @users = Posts\select!
+        render: "posts"
+
+    "/dashboard": =>
+        render: "dashboard"
+
+    "/api/users": respond_to {
         GET: =>
             users = Users\select!
             json: users
@@ -33,18 +63,29 @@ class extends lapis.Application
             user = Users\create {
                 name: @params.name
                 email: @params.email
+                display_name: @params.display_name
             }
             json: user
     }
 
-    "/api/users/:id": respond_to {
-        GET: =>
-            user = Users\find @params.id
+    "/api/users/:id[%d]": respond_to {
+        GET: capture_errors_json =>
+            user = assert_error Users\find id: @params.id, "User does not exist"
             json: user
         DELETE: =>
             user = Users\find @params.id
             user\delete!
             json: user
+    }
+
+    "/api/users/:id[%d]/post": respond_to {
+        POST: =>
+            post = Posts\create {
+                user_id: @params.id
+                title: @params.title
+                description: @params.description
+            }
+            json: post
     }
 
     "/api/tags": respond_to {
@@ -61,7 +102,7 @@ class extends lapis.Application
             json: tags
     }
 
-    "/api/tags/:id": respond_to {
+    "/api/tags/:id[%d]": respond_to {
         GET: =>
             tag = Tags\find @params.id
             json: tag
@@ -77,17 +118,17 @@ class extends lapis.Application
             json: posts
     }
 
-    "/api/posts/:id": respond_to {
+    "/api/posts/:id[%d]": respond_to {
         GET: =>
             post = Posts\find @params.id
-            json: post
+            json: {
+                content: post
+                author: post\get_user!
+            }
         DELETE: =>
             post = Posts\find @params.id
             post\delete!
             json: post
     }
 
-    "/console": respond_to {
-        GET: =>
-            console.make!
-    }
+    "/console": console.make!

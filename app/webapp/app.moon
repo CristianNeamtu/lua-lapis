@@ -121,10 +121,7 @@ class App extends lapis.Application
     "/api/posts/:id[%d]": respond_to {
         GET: =>
             post = Posts\find @params.id
-            json: {
-                content: post
-                author: post\get_user!
-            }
+            json: post
         DELETE: =>
             post = Posts\find @params.id
             post\delete!
